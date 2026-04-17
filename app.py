@@ -2,25 +2,27 @@ import streamlit as st
 from sentiment_analysis import SentimentAnalyzer
 from spotify_client import SpotifyClient
 
+# Sayfa yapılandırması: Başlık, ikon ve yerleşim ayarları
 st.set_page_config(page_title="Kokorofy - Müzik Önerici", page_icon="🎵", layout="centered")
 
+# Windows 98 Teması için CSS kodları
 win98_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
 
-/* Teal desktop background */
+/* Teal masaüstü arka planı */
 .stApp {
     background-color: #008080 !important;
     font-family: 'Pixelify Sans', 'MS Sans Serif', Tahoma, sans-serif !important;
     background-image: none !important;
 }
 
-/* Remove default header */
+/* Varsayılan Streamlit başlığını gizle */
 header[data-testid="stHeader"] {
     display: none;
 }
 
-/* The Main Window */
+/* Ana Pencere Tasarımı */
 .block-container {
     background-color: #c0c0c0 !important;
     border-top: 2px solid #ffffff !important;
@@ -35,7 +37,7 @@ header[data-testid="stHeader"] {
     color: #000000 !important;
 }
 
-/* Base text */
+/* Metin stilleri */
 h1, h2, h3, p, span, div, label, li {
     font-family: inherit !important;
     color: #000000 !important;
@@ -46,7 +48,7 @@ h1 { font-size: 1.5rem !important; }
 h2 { font-size: 1.2rem !important; }
 h3 { font-size: 1.1rem !important; }
 
-/* Title Bar simulated */
+/* Windows 98 Başlık Çubuğu Simülasyonu */
 .win98-title-bar {
     background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
     padding: 2px 3px 2px 3px;
@@ -83,7 +85,7 @@ h3 { font-size: 1.1rem !important; }
     display: inline-block;
 }
 
-/* Text Area */
+/* Metin Giriş Alanı (Text Area) */
 .stTextArea textarea {
     background-color: #ffffff !important;
     border-top: 2px solid #808080 !important;
@@ -99,7 +101,7 @@ h3 { font-size: 1.1rem !important; }
     box-shadow: inset 1px 1px #000000, inset -1px -1px #dfdfdf !important;
 }
 
-/* Button */
+/* Buton Tasarımı */
 .stButton>button {
     background-color: #c0c0c0 !important;
     border-top: 2px solid #ffffff !important;
@@ -120,10 +122,10 @@ h3 { font-size: 1.1rem !important; }
     border-right: 2px solid #ffffff !important;
     border-bottom: 2px solid #ffffff !important;
     box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf !important;
-    padding: 5px 14px 3px 16px !important; /* Visual inset shift */
+    padding: 5px 14px 3px 16px !important;
 }
 
-/* Spinner / Info block replacements */
+/* Uyarı ve Bilgi Kutuları */
 .stAlert {
     background-color: #c0c0c0 !important;
     border-top: 2px solid #ffffff !important;
@@ -136,19 +138,7 @@ h3 { font-size: 1.1rem !important; }
     padding: 10px !important;
 }
 
-/* Inner frame for content to look like a Win98 sub-window */
-.win98-inner-frame {
-    border-top: 2px solid #808080;
-    border-left: 2px solid #808080;
-    border-bottom: 2px solid #ffffff;
-    border-right: 2px solid #ffffff;
-    box-shadow: inset 1px 1px #000000, inset -1px -1px #dfdfdf;
-    padding: 15px;
-    background-color: #c0c0c0;
-    margin-bottom: 10px;
-}
-
-/* Song card images */
+/* Resim çerçeveleri */
 .stImage img {
     border-top: 2px solid #808080 !important;
     border-left: 2px solid #808080 !important;
@@ -157,13 +147,13 @@ h3 { font-size: 1.1rem !important; }
     box-shadow: inset 1px 1px #000, inset -1px -1px #dfdfdf !important;
 }
 
-/* Links */
+/* Bağlantılar */
 a {
     color: #0000ff !important;
     text-decoration: underline !important;
 }
 
-/* Separators */
+/* Ayraçlar */
 hr {
     border: none !important;
     border-top: 2px solid #808080 !important;
@@ -171,14 +161,14 @@ hr {
     margin: 15px 0 !important;
 }
 
-/* Hide Streamlit elements */
+/* Streamlit öğelerini gizleme */
 .st-emotion-cache-1jo8hni, .st-emotion-cache-1wtvtyf { display: none; }
 </style>
 """
 
 st.markdown(win98_css, unsafe_allow_html=True)
 
-# Custom Win98 Title Bar
+# Özel Win98 Başlık Çubuğu
 st.markdown("""
 <div class="win98-title-bar">
     <span>🎶 Kokorofy.exe</span>
@@ -190,36 +180,39 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Inner content wrapped in Markdown for visual structure where possible
-# However, Streamlit components will break HTML flow. We will just use standard Streamlit components which are styled globally.
-
-
 # Modelleri önbellekte tut, her yenilemede tekrar yüklenmesin
 @st.cache_resource
 def load_sentiment_analyzer():
+    """Duygu analizi motorunu önbelleğe alarak yükler."""
     return SentimentAnalyzer()
 
 @st.cache_resource
 def load_spotify_client():
+    """Spotify API istemcisini önbelleğe alarak yükler."""
     return SpotifyClient()
 
+# Giriş Ekranı Metinleri
 st.markdown("Kokorofy Ruh Hali Algılama Sihirbazı'na Hoş Geldiniz.")
 st.markdown("Lütfen mevcut ruh halinizi tarif ediniz. Cihazınız sizin için Müzik CD'lerini tarayacaktır.")
 st.markdown("---")
 
+# Servisleri başlat
 with st.spinner("Sürücüler yükleniyor..."):
     analyzer = load_sentiment_analyzer()
     spotify = load_spotify_client()
 
+# Kullanıcı Girişi
 user_input = st.text_area("Mevcut Durumunuz:", placeholder="C:\> Bugün harika hissediyorum!")
 
 if st.button("Müzik Bul"):
     if not user_input.strip():
         st.warning("HATA: Girdi bulunamadı. Lütfen boş bırakmayın.")
     else:
+        # 1. Aşama: Duygu Analizi
         with st.spinner("NLP Motoru Çalışıyor..."):
             emotion = analyzer.get_emotion(user_input)
             
+        # Duygu etiketlerinin Türkçe karşılıkları
         emotion_tr = {
             'happy': 'Mutlu 😃',
             'energetic': 'Enerjik ⚡',
@@ -236,9 +229,11 @@ if st.button("Müzik Bul"):
             
         st.success(f"Analiz Tamamlandı! Tespit Edilen Değer: {emotion_tr.get(emotion, emotion).upper()}")
         
+        # 2. Aşama: Spotify Önerileri
         with st.spinner("Ağ üzerinden Spotify Sunucularına Bağlanılıyor..."):
             recommendations = spotify.get_recommendations_for_emotion(emotion)
             
+        # 3. Aşama: Sonuçları Listele
         if recommendations:
             st.markdown("### Bulunan Medya Dosyaları:")
             st.markdown("---")
