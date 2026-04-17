@@ -1,27 +1,49 @@
 from transformers import pipeline
 
 class SentimentAnalyzer:
+    """
+    Kullanıcı metinlerini analiz ederek duygu durumlarını tespit eden sınıf.
+    Zero-Shot Classification modelini kullanarak metnin bağlamını anlar.
+    """
+    
     def __init__(self):
-        # Klasik sentiment yerine çok daha zeki olan Multi-lingual Zero-Shot Classification modeline geçiyoruz.
-        # Bu model herhangi bir kelime dizisi listesine ihtiyaç duymadan cümlenin bağlamını (anlamını) kavrar
-        # ve verdiğimiz etiketler (mutlu, üzgün vb.) arasında en mantıklı olanı seçer.
-        self.analyzer = pipeline("zero-shot-classification", model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
+        """
+        Duygu analizi modelini (mDeBERTa-v3-base-mnli-xnli) yükler.
+        Bu model çok dilli desteğe sahiptir ve sıfır-atış (zero-shot) sınıflandırma yapabilir.
+        """
+        # Model yükleme işlemi (HuggingFace üzerinden)
+        self.analyzer = pipeline(
+            "zero-shot-classification", 
+            model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
+        )
         
     def get_emotion(self, text):
         """
-        Metni okur ve bağlamı anlayarak en uygun Spotify duygu kategorisini döner.
+        Verilen metni analiz eder ve en uygun Spotify duygu kategorisini döndürür.
+        
+        Args:
+            text (str): Kullanıcının girdiği ruh hali açıklaması.
+            
+        Returns:
+            str: Spotify için uygun olan duygu anahtarı (örn: 'happy', 'sad').
         """
-        # Yalnizca Türkçe candidate listesini kullanıyoruz:
+        # Analiz edilecek hedef etiketler (Türkçe)
+        candidate_labels = [
+            'mutlu', 'üzgün', 'enerjik', 'sakin', 'romantik', 
+            'odaklanmış', 'eğlenmiş', 'uykulu', 'nostaljik', 'öfkeli', 'özgüvenli'
+        ]
         
-        # Spotify Mood/Genre sistemine paralel çok daha geniş kapsamlı duygu yelpazesi:
-        candidate_labels = ['mutlu', 'üzgün', 'enerjik', 'sakin', 'romantik', 'odaklanmış', 'eğlenmiş', 'uykulu', 'nostaljik', 'öfkeli', 'özgüvenli']
+        # Zero-shot sınıflandırma tahmini
+        result = self.analyzer(
+            text, 
+            candidate_labels=candidate_labels, 
+            hypothesis_template="Bu metin {} hissi veriyor."
+        )
         
-        result = self.analyzer(text, candidate_labels=candidate_labels, hypothesis_template="Bu metin {} hissi veriyor.")
-        
-        # En yüksek ihtimalli sonucu al
+        # En yüksek güven skoruna sahip etiketi seç
         best_label = result['labels'][0]
         
-        # Seçilen Türkçe etiketi İngilizce Spotify kategorisine çevir
+        # Türkçe etiketleri Spotify API sorgularında kullanılacak İngilizce karşılıklarına eşle
         mapping = {
             'mutlu': 'happy',
             'üzgün': 'sad',
