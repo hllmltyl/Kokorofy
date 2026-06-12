@@ -4,43 +4,30 @@ import os
 import random
 from dotenv import load_dotenv
 
-# .env dosyasındaki ortam değişkenlerini yükle
+# Ortam değişkenlerini yükle
 load_dotenv()
 
 class SpotifyClient:
-    """
-    Spotify Web API ile etkileşime geçen istemci sınıfı.
-    Şarkı arama ve öneri işlemlerini yürütür.
-    """
+    """Spotify Web API istemcisi. Şarkı arama ve öneri işlemlerini yapar."""
     
     def __init__(self):
-        """
-        Spotify API kimlik bilgilerini yükler ve istemciyi doğrular.
-        """
+        """Spotify API kimlik bilgilerini doğrular."""
         client_id = os.getenv("SPOTIPY_CLIENT_ID")
         client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
         
         if not client_id or not client_secret:
-            raise ValueError("Spotify API anahtarları eksik. Lütfen .env dosyasını kontrol edin.")
+            raise ValueError("Spotify API anahtarları eksik. .env dosyasını kontrol edin.")
             
-        # İstemci kimlik bilgileri ile kimlik doğrulama yöneticisini başlat
+        # API kimlik doğrulaması
         auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
         self.sp = spotipy.Spotify(auth_manager=auth_manager)
         
     def get_recommendations_for_emotion(self, emotion):
-        """
-        Belirlenen duygu durumuna göre Spotify üzerinden şarkı önerileri getirir.
-        
-        Args:
-            emotion (str): Analiz sonucunda gelen duygu anahtarı (örn: 'happy', 'energetic').
-            
-        Returns:
-            list: Şarkı bilgilerini içeren sözlük listesi.
-        """
+        """Duygu durumuna göre Spotify'dan şarkı önerileri getirir."""
         limit = 5
         market = 'TR'
         
-        # Duygu durumlarına göre özelleştirilmiş arama sorguları havuzu
+        # Duygu durumlarına göre arama kelimeleri
         tag_queries = {
             'happy': ['happy pop', 'feel good', 'happy hits', 'neşeli'],
             'energetic': ['workout', 'energetic dance', 'gym hype', 'upbeat'],
@@ -55,17 +42,17 @@ class SpotifyClient:
             'confident': ['badass hype', 'confident pop', 'boss vibe']
         }
         
-        # Duygu anahtarına göre sorgu listesini al, yoksa 'pop' varsayılanını kullan
+        # Duyguya göre sorgu havuzunu seç, yoksa varsayılan 'pop'
         pool = tag_queries.get(emotion, ['pop'])
-        # Listeden rastgele bir sorgu seçerek çeşitlilik sağla
+        # Rastgele arama kelimesi seç
         selected_query = random.choice(pool)
         
         tracks = []
         try:
-            # Arama sonuçlarında çeşitliliği artırmak için rastgele bir başlangıç noktası (offset) seç
+            # Çeşitlilik için rastgele offset değeri belirle
             offset_val = random.randint(0, 80)
             
-            # Spotify üzerinde arama yap
+            # Spotify'da arama yap
             search_results = self.sp.search(q=selected_query, type='track', limit=limit, offset=offset_val, market=market)
             
             for track in search_results['tracks']['items']:
@@ -74,7 +61,7 @@ class SpotifyClient:
                 # Albüm kapağı URL'sini al
                 cover_url = track['album']['images'][0]['url'] if track['album']['images'] else None
                 
-                # Gerekli bilgileri sözlük formatında listeye ekle
+                # Parça bilgilerini listeye ekle
                 tracks.append({
                     'name': track['name'],
                     'artist': track['artists'][0]['name'],

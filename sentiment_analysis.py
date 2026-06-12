@@ -1,49 +1,35 @@
 from transformers import pipeline
 
 class SentimentAnalyzer:
-    """
-    Kullanıcı metinlerini analiz ederek duygu durumlarını tespit eden sınıf.
-    Zero-Shot Classification modelini kullanarak metnin bağlamını anlar.
-    """
+    """Metinlerden zero-shot sınıflandırma ile duygu durumunu tespit eder."""
     
     def __init__(self):
-        """
-        Duygu analizi modelini (mDeBERTa-v3-base-mnli-xnli) yükler.
-        Bu model çok dilli desteğe sahiptir ve sıfır-atış (zero-shot) sınıflandırma yapabilir.
-        """
-        # Model yükleme işlemi (HuggingFace üzerinden)
+        """Duygu analizi modelini yükler."""
+        # HuggingFace üzerinden çok dilli modeli yükle
         self.analyzer = pipeline(
             "zero-shot-classification", 
             model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
         )
         
     def get_emotion(self, text):
-        """
-        Verilen metni analiz eder ve en uygun Spotify duygu kategorisini döndürür.
-        
-        Args:
-            text (str): Kullanıcının girdiği ruh hali açıklaması.
-            
-        Returns:
-            str: Spotify için uygun olan duygu anahtarı (örn: 'happy', 'sad').
-        """
-        # Analiz edilecek hedef etiketler (Türkçe)
+        """Metni analiz edip en uygun Spotify duygu anahtarını döner."""
+        # Hedef Türkçe duygu etiketleri
         candidate_labels = [
             'mutlu', 'üzgün', 'enerjik', 'sakin', 'romantik', 
             'odaklanmış', 'eğlenmiş', 'uykulu', 'nostaljik', 'öfkeli', 'özgüvenli'
         ]
         
-        # Zero-shot sınıflandırma tahmini
+        # Sınıflandırma tahmini
         result = self.analyzer(
             text, 
             candidate_labels=candidate_labels, 
             hypothesis_template="Bu metin {} hissi veriyor."
         )
         
-        # En yüksek güven skoruna sahip etiketi seç
+        # En yüksek skorlu etiketi seç
         best_label = result['labels'][0]
         
-        # Türkçe etiketleri Spotify API sorgularında kullanılacak İngilizce karşılıklarına eşle
+        # Türkçe etiketleri İngilizce Spotify kategorilerine eşle
         mapping = {
             'mutlu': 'happy',
             'üzgün': 'sad',

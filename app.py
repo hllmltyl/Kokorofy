@@ -2,27 +2,27 @@ import streamlit as st
 from sentiment_analysis import SentimentAnalyzer
 from spotify_client import SpotifyClient
 
-# Sayfa yapılandırması: Başlık, ikon ve yerleşim ayarları
+# Sayfa yapılandırması
 st.set_page_config(page_title="Kokorofy - Müzik Önerici", page_icon="🎵", layout="centered")
 
-# Windows 98 Teması için CSS kodları
+# Windows 98 teması için CSS
 win98_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
 
-/* Teal masaüstü arka planı */
+/* Masaüstü arka planı */
 .stApp {
     background-color: #008080 !important;
     font-family: 'Pixelify Sans', 'MS Sans Serif', Tahoma, sans-serif !important;
     background-image: none !important;
 }
 
-/* Varsayılan Streamlit başlığını gizle */
+/* Varsayılan başlığı gizle */
 header[data-testid="stHeader"] {
     display: none;
 }
 
-/* Ana Pencere Tasarımı */
+/* Ana pencere tasarımı */
 .block-container {
     background-color: #c0c0c0 !important;
     border-top: 2px solid #ffffff !important;
@@ -48,7 +48,7 @@ h1 { font-size: 1.5rem !important; }
 h2 { font-size: 1.2rem !important; }
 h3 { font-size: 1.1rem !important; }
 
-/* Windows 98 Başlık Çubuğu Simülasyonu */
+/* Başlık çubuğu simülasyonu */
 .win98-title-bar {
     background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
     padding: 2px 3px 2px 3px;
@@ -85,7 +85,7 @@ h3 { font-size: 1.1rem !important; }
     display: inline-block;
 }
 
-/* Metin Giriş Alanı (Text Area) */
+/* Metin giriş alanı */
 .stTextArea textarea {
     background-color: #ffffff !important;
     border-top: 2px solid #808080 !important;
@@ -101,7 +101,7 @@ h3 { font-size: 1.1rem !important; }
     box-shadow: inset 1px 1px #000000, inset -1px -1px #dfdfdf !important;
 }
 
-/* Buton Tasarımı */
+/* Buton tasarımı */
 .stButton>button {
     background-color: #c0c0c0 !important;
     border-top: 2px solid #ffffff !important;
@@ -125,7 +125,7 @@ h3 { font-size: 1.1rem !important; }
     padding: 5px 14px 3px 16px !important;
 }
 
-/* Uyarı ve Bilgi Kutuları */
+/* Bilgi kutuları */
 .stAlert {
     background-color: #c0c0c0 !important;
     border-top: 2px solid #ffffff !important;
@@ -161,14 +161,14 @@ hr {
     margin: 15px 0 !important;
 }
 
-/* Streamlit öğelerini gizleme */
+/* Streamlit bileşenlerini gizle */
 .st-emotion-cache-1jo8hni, .st-emotion-cache-1wtvtyf { display: none; }
 </style>
 """
 
 st.markdown(win98_css, unsafe_allow_html=True)
 
-# Özel Win98 Başlık Çubuğu
+# Başlık çubuğu
 st.markdown("""
 <div class="win98-title-bar">
     <span>🎶 Kokorofy.exe</span>
@@ -180,18 +180,18 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Modelleri önbellekte tut, her yenilemede tekrar yüklenmesin
+# Servisleri önbelleğe al
 @st.cache_resource
 def load_sentiment_analyzer():
-    """Duygu analizi motorunu önbelleğe alarak yükler."""
+    """Duygu analizi motorunu önbellekten yükler."""
     return SentimentAnalyzer()
 
 @st.cache_resource
 def load_spotify_client():
-    """Spotify API istemcisini önbelleğe alarak yükler."""
+    """Spotify istemcisini önbellekten yükler."""
     return SpotifyClient()
 
-# Giriş Ekranı Metinleri
+# Giriş metinleri
 st.markdown("Kokorofy Ruh Hali Algılama Sihirbazı'na Hoş Geldiniz.")
 st.markdown("Lütfen mevcut ruh halinizi tarif ediniz. Cihazınız sizin için Müzik CD'lerini tarayacaktır.")
 st.markdown("---")
@@ -201,18 +201,18 @@ with st.spinner("Sürücüler yükleniyor..."):
     analyzer = load_sentiment_analyzer()
     spotify = load_spotify_client()
 
-# Kullanıcı Girişi
-user_input = st.text_area("Mevcut Durumunuz:", placeholder="C:\> Bugün harika hissediyorum!")
+# Kullanıcı girdisi
+user_input = st.text_area("Mevcut Durumunuz:", placeholder=r"C:\> Bugün harika hissediyorum!")
 
 if st.button("Müzik Bul"):
     if not user_input.strip():
         st.warning("HATA: Girdi bulunamadı. Lütfen boş bırakmayın.")
     else:
-        # 1. Aşama: Duygu Analizi
+        # 1. Aşama: Duygu analizi
         with st.spinner("NLP Motoru Çalışıyor..."):
             emotion = analyzer.get_emotion(user_input)
             
-        # Duygu etiketlerinin Türkçe karşılıkları
+        # Türkçe duygu etiketleri
         emotion_tr = {
             'happy': 'Mutlu 😃',
             'energetic': 'Enerjik ⚡',
@@ -229,11 +229,11 @@ if st.button("Müzik Bul"):
             
         st.success(f"Analiz Tamamlandı! Tespit Edilen Değer: {emotion_tr.get(emotion, emotion).upper()}")
         
-        # 2. Aşama: Spotify Önerileri
+        # 2. Aşama: Spotify önerileri
         with st.spinner("Ağ üzerinden Spotify Sunucularına Bağlanılıyor..."):
             recommendations = spotify.get_recommendations_for_emotion(emotion)
             
-        # 3. Aşama: Sonuçları Listele
+        # 3. Aşama: Sonuçları listele
         if recommendations:
             st.markdown("### Bulunan Medya Dosyaları:")
             st.markdown("---")

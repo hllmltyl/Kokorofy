@@ -3,5 +3,3 @@ transformers
 torch
 spotipy
 python-dotenv
-tf-keras
-torchvision
